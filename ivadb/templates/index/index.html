@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Internet Voice Actor Database</title>
+        <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+        <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+    </head>
+    <body>
+        <div class="container">
+            <div class="four columns">
+                <actorlist />
+            </div>
+            <div class="four columns">
+                <characterlist />
+            </div>
+            <div class="four columns">
+                <serieslist />
+            </div>
+        </div>
+        <script src="//cdn.jsdelivr.net/g/riot@2.0(riot.min.js+compiler.min.js)"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/superagent/0.15.7/superagent.min.js"></script>
+        <script type="riot/tag">
+            <actorlist>
+                <h1>Actors</h1>
+                <ul>
+                <li each={ items }>{ id }: { name }</li>
+                </ul>
+                <form method="POST" onsubmit={ add }>
+                    <label for="actor_name">Name</label><input id="actor_name" name="actor_name" type="text">
+                    <br><button type="submit">Add</button>
+                </form>
+
+                var $this = this;
+                this.items = [];
+                superagent.get("{{ url_for('actorlistresource') }}").end(function(response) {
+                    $this.items = response.body;
+                    $this.update();
+                });
+
+                add(e) {
+                    superagent.post(" {{ url_for('actorlistresource') }}")
+                        .send({name: $this.actor_name.value}).end(function(response) {
+                            $this.items.push(response.body);
+                            $this.actor_name.value = '';
+                            $this.update();
+                        });
+                }
+            </actorlist>
+        </script>
+        <script type="riot/tag">
+            <serieslist>
+                <h1>Series</h1>
+                <ul>
+                    <li each={ items }>{ id }: { name } ({ debut_year })</li>
+                </ul>
+                <form method="POST" onsubmit={ add }>
+                    <label for="series_name">Name</label><input id="series_name" name="series_name" type="text">
+                    <label for="debut_year">Debut year</label><input id="debut_year" name="debut_year" type="text">
+                    <br><button type="submit">Add</button>
+                </form>
+
+                var $this = this;
+                $this.items = [];
+                superagent.get("{{ url_for('serieslistresource') }}").end(function(response) {
+                    $this.items = response.body;
+                    $this.update();
+                });
+
+                add(e) {
+                    superagent.post("{{ url_for('serieslistresource') }}").send({
+                        name: $this.series_name.value,
+                        debut_year: $this.debut_year.value,
+                    }).end(function(response) {
+                        $this.items.push(response.body);
+                        $this.series_name.value = '';
+                        $this.debut_year.value = '';
+                        $this.update();
+                    });
+                }
+            </serieslist>
+        </script>
+        <script type="riot/tag">
+            <characterlist>
+                <h1>Characters</h1>
+                <ul>
+                    <li each={ items }>{ id }: { actor.name } plays { name } on { series.name }</li>
+                </ul>
+                <form method="POST" onsubmit={ add }>
+                    <label for="character_name">Name</label><input id="character_name" name="character_name" type="text">
+                    <label for="actor_id">Actor ID</label><input id="actor_id" name="actor_id" type="text">
+                    <label for="series_id">Series ID</label><input id="series_id" name="series_id" type="text">
+                    <br><button type="submit">Add</button>
+                </form>
+
+                var $this = this;
+                $this.items = [];
+
+                superagent.get("{{ url_for('characterlistresource') }}").end(function(response) {
+                    $this.items = response.body;
+                    $this.update();
+                });
+
+                add(e) {
+                    superagent.post("{{ url_for('characterlistresource') }}").send({
+                        name: $this.character_name.value,
+                        actor_id: $this.actor_id.value,
+                        series_id: $this.series_id.value,
+                    }).end(function(response) {
+                        $this.items.push(response.body);
+                        $this.character_name.value = '';
+                        $this.actor_id.value = '';
+                        $this.series_id.value = '';
+                        $this.update();
+                    });
+                }
+            </characterlist>
+        </script>
+        <script>riot.mount('*');</script>
+    </body>
+</html>

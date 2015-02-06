@@ -1,0 +1,13 @@
+from os import environ as env
+
+
+DEBUG = env.get('DEBUG', False)
+SECRET_KEY = env.get('SECRET_KEY', 'super-secret')
+SECURITY_REGISTERABLE = True
+SECURITY_SEND_REGISTER_EMAIL = False
+SECURITY_SEND_PASSWORD_CHANGE_EMAIL = False
+SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL = False
+SQLALCHEMY_DATABASE_URI = env.get(
+    'SQLALCHEMY_DATABASE_URI',
+    'sqlite:////tmp/app.db',
+)
